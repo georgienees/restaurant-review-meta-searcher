@@ -1,0 +1,52 @@
+python
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+
+# TripAdvisor URL
+ta_url = "https://www.tripadvisor.com/Restaurant_Review-g189484-d259094-Reviews"
+
+# Yelp URL
+yelp_url = "https://www.yelp.com/search?name=example_restaurant"
+
+# Initialize the Selenium driver
+chrome_service = Service("path/to/chromedriver/executable")
+driver = webdriver.Chrome(service=chrome_service)
+
+# Visit the TripAdvisor URL
+driver.get(ta_url)
+
+# Visit the Yelp URL
+driver.get(yelp_url)
+
+# Parse the HTML content
+ta_soup = BeautifulSoup(driver.page_source.html, "html.parser")
+ya_soup = BeautifulSoup(driver.page_source.html, "html.parser")
+
+# Extract the restaurant information from TripAdvisor
+ta_name = ta_soup.title.string
+ta_rating = ta_soup.find("div", class_="rating").text
+ta_review_count = ta_soup.find("div", class_="review-count").text
+
+# Extract the restaurant information from Yelp
+ya_name = ya_soup.title.string
+ya_rating = ya_soup.find("div", class_="rating").text
+ya_review_count = ya_soup.find("div", class_="review-count").text
+
+# Store the information in a pandas DataFrame
+data = {
+    "Restaurant": [ta_name, ya_name],
+    "Rating": [ta_rating, ya_rating],
+    "Review Count": [ta_review_count, ya_review_count]
+}
+
+df = pd.DataFrame(data)
+
+# Save the DataFrame to a CSV file
+df.to_csv("restaurant_reviews.csv", index=False)
+
+# Close the browser window
+driver.quit()
